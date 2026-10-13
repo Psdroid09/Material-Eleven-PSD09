@@ -1,0 +1,97 @@
+name: Publicar Material-Eleven PSD09
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publicar-material-eleven.yml
+      - scripts/patch-*.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [joystick, cruceta]
+    runs-on: ubuntu-latest
+    container: vitasdk/vitasdk:2026.08
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar Material-Eleven oficial 3.9.0
+        run: git clone --depth 1 --branch v3.9.0 https://github.com/Perroabuelo/Material-Eleven.git material-eleven
+
+      - name: Integrar controles experimentales
+        run: python3 scripts/patch-${{ matrix.variant }}.py
+
+      - name: Compilar VPK
+        run: |
+          cmake -S material-eleven -B material-eleven/build
+          cmake --build material-eleven/build -j"$(nproc)"
+          test -s material-eleven/build/ElevenMPV.vpk
+
+      - name: Renombrar VPK
+        run: |
+          mkdir -p dist
+          cp material-eleven/build/ElevenMPV.vpk dist/Material-Eleven-3.9.0-PSD09-${{ matrix.variant }}.vpk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: material-vpk-${{ matrix.variant }}
+          path: dist/*.vpk
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: material-vpk-*
+          path: dist
+          merge-multiple: true
+
+      - name: Verificar VPK
+        run: |
+          ls -l dist/*.vpk
+          test -s dist/Material-Eleven-3.9.0-PSD09-joystick.vpk
+          test -s dist/Material-Eleven-3.9.0-PSD09-cruceta.vpk
+
+      - name: Publicar release con dos VPK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cat > /tmp/release-notes.md <<'EOF'
+          Material-Eleven PSD09 — fork experimental basado en Material-Eleven 3.9.0.
+
+          Descargas:
+          - Material-Eleven-3.9.0-PSD09-joystick.vpk — stick derecho para cambiar canciones con la pantalla apagada. Comprobado por el usuario en PS Vita.
+          - Material-Eleven-3.9.0-PSD09-cruceta.vpk — cruceta izquierda/derecha para cambiar canciones con la pantalla apagada. EXPERIMENTAL: falta comprobar si la consola entrega los botones digitales al apagar la pantalla.
+
+          Ambas versiones mantienen START para solicitar apagar la pantalla. Solo instala una a la vez: comparten el mismo identificador de aplicacion ELEVENMPV.
+
+          Proyecto original: https://github.com/Perroabuelo/Material-Eleven
+          Inspiracion para joystick: https://github.com/GrapheneCt/ElevenMPV-A
+          Codigo GPLv3 con atribuciones y licencias incluidas en el VPK.
+
+          ATENCION: este repositorio es privado. RepoHub puede no encontrar releases privadas porque su explorador usa endpoints publicos. En tal caso utiliza GitHub con autenticacion o publica el repositorio antes de intentar descargarlo por RepoHub.
+          EOF
+          if gh release view v3.9.0-PSD09.1 >/dev/null 2>&1; then
+            gh release upload v3.9.0-PSD09.1 dist/*.vpk --clobber
+            gh release edit v3.9.0-PSD09.1 --notes-file /tmp/release-notes.md
+          else
+            gh release create v3.9.0-PSD09.1 dist/*.vpk --title "Material-Eleven PSD09 3.9.0 — joystick + cruceta TEST" --notes-file /tmp/release-notes.md --target main
+          fi
+
+      - name: Confirmar archivos publicados
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release view v3.9.0-PSD09.1 --json url,assets
