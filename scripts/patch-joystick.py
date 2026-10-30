@@ -45,6 +45,8 @@ replace_exact("source/utils.c",
     "\t\t// Activar escucha del stick. Requiere volver al centro primero.\n"
     "\t\tstick_screen_off = 1;\n"
     "\t\tstick_ready = 0;\n"
+    "\t\tstick_candidate = 0;\n"
+    "\t\tstick_candidate_samples = 0;\n"
     "\t\tscePowerRequestDisplayOff();\n"
     "\t}\n")
 
