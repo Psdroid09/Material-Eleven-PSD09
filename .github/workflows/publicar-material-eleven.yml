@@ -54,7 +54,6 @@ jobs:
         run: |
           mkdir -p dist
           cp material-eleven/build/ElevenMPV.vpk dist/Material-Eleven-3.9.0-PSD09-${{ matrix.variant }}.vpk
-          sha256sum dist/*.vpk > dist/SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
         with:
@@ -81,8 +80,7 @@ jobs:
         run: |
           test -s dist/Material-Eleven-3.9.0-PSD09-joystick.vpk
           test -s dist/Material-Eleven-3.9.0-PSD09-cruceta.vpk
-          test -s dist/SHA256SUMS.txt
-          (cd dist && sha256sum -c SHA256SUMS.txt)
+          (cd dist && sha256sum *.vpk > SHA256SUMS.txt && sha256sum -c SHA256SUMS.txt)
 
       - name: Publicar release nueva
         env:
