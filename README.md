@@ -19,7 +19,7 @@ Consulta [Releases](https://github.com/Psdroid09/Material-Eleven-PSD09/releases)
 2. Instálalo con VitaShell como cualquier otra aplicación.
 3. Abre Material-Eleven y empieza a reproducir música.
 4. Pulsa START para solicitar el apagado de la pantalla.
-5. En la variante joystick, mueve el stick derecho a izquierda o derecha para cambiar de pista. Vuelve a la zona central antes de hacer otro cambio; así se evita repetir la acción mientras mantienes el stick inclinado.
+5. En la variante joystick, mueve el stick derecho a izquierda o derecha para cambiar de pista. El movimiento debe mantenerse durante dos lecturas consecutivas y después volver a la zona central antes de hacer otro cambio; esto filtra picos aislados y evita repetir la acción mientras mantienes el stick inclinado. Al volver a usar un botón de navegación, la aplicación sale del modo de control a ciegas.
 
 La variante joystick requiere que el control analógico esté disponible para la aplicación. El parche habilita el muestreo analógico y procesa el movimiento dentro del ciclo normal de lectura de controles; no crea un hilo adicional.
 
