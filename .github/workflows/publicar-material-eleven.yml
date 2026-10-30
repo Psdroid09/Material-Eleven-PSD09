@@ -6,10 +6,29 @@ on:
     paths:
       - .github/workflows/publicar-material-eleven.yml
       - scripts/patch-*.py
+  pull_request:
+    paths:
+      - .github/workflows/publicar-material-eleven.yml
+      - scripts/patch-*.py
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publicar una release nueva (no sobrescribe etiquetas existentes)"
+        required: true
+        type: boolean
+        default: false
+      release_tag:
+        description: "Etiqueta nueva para la release"
+        required: true
+        type: string
+        default: "v3.9.0-PSD09.2"
 
 permissions:
   contents: read
+
+concurrency:
+  group: material-eleven-build-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -18,6 +37,7 @@ jobs:
       matrix:
         variant: [joystick, cruceta]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     container: vitasdk/vitasdk:2026.08
     steps:
       - uses: actions/checkout@v4
@@ -42,12 +62,15 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: material-vpk-${{ matrix.variant }}
-          path: dist/*.vpk
+          path: dist/*
           if-no-files-found: error
+          retention-days: 14
 
   release:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_release
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -57,41 +80,36 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Verificar VPK
+      - name: Verificar VPK y hashes
         run: |
-          ls -l dist/*.vpk
           test -s dist/Material-Eleven-3.9.0-PSD09-joystick.vpk
           test -s dist/Material-Eleven-3.9.0-PSD09-cruceta.vpk
+          (cd dist && sha256sum *.vpk > SHA256SUMS.txt && sha256sum -c SHA256SUMS.txt)
 
-      - name: Publicar release con dos VPK
+      - name: Publicar release nueva
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "La etiqueta $RELEASE_TAG ya existe; no se sobrescribira." >&2
+            exit 1
+          fi
           cat > /tmp/release-notes.md <<'EOF'
-          Material-Eleven PSD09 — fork experimental basado en Material-Eleven 3.9.0.
+          Material-Eleven PSD09 — fork basado en Material-Eleven 3.9.0.
 
-          Descargas:
-          - Material-Eleven-3.9.0-PSD09-joystick.vpk — stick derecho para cambiar canciones con la pantalla apagada. Comprobado por el usuario en PS Vita.
-          - Material-Eleven-3.9.0-PSD09-cruceta.vpk — cruceta izquierda/derecha para cambiar canciones con la pantalla apagada. EXPERIMENTAL: falta comprobar si la consola entrega los botones digitales al apagar la pantalla.
+          - joystick: stick derecho para cambiar de pista con la pantalla apagada. Probada por el usuario en PS Vita.
+          - cruceta: izquierda/derecha para cambiar de pista con la pantalla apagada. Variante experimental; la lectura de botones digitales aún debe confirmarse.
 
-          Ambas versiones mantienen START para solicitar apagar la pantalla. Solo instala una a la vez: comparten el mismo identificador de aplicacion ELEVENMPV.
+          Instala solo una variante: ambas comparten el identificador ELEVENMPV.
+          Se adjunta SHA256SUMS.txt para verificar la integridad de los VPK descargados.
 
           Proyecto original: https://github.com/Perroabuelo/Material-Eleven
-          Inspiracion para joystick: https://github.com/GrapheneCt/ElevenMPV-A
-          Codigo GPLv3 con atribuciones y licencias incluidas en el VPK.
-
-          ATENCION: este repositorio es privado. RepoHub puede no encontrar releases privadas porque su explorador usa endpoints publicos. En tal caso utiliza GitHub con autenticacion o publica el repositorio antes de intentar descargarlo por RepoHub.
+          Inspiración para el control con stick: https://github.com/GrapheneCt/ElevenMPV-A
+          Código derivado bajo GPL-3.0-or-later; conserva los créditos y avisos originales.
           EOF
-          if gh release view v3.9.0-PSD09.1 >/dev/null 2>&1; then
-            gh release upload v3.9.0-PSD09.1 dist/*.vpk --clobber
-            gh release edit v3.9.0-PSD09.1 --notes-file /tmp/release-notes.md
-          else
-            gh release create v3.9.0-PSD09.1 dist/*.vpk --title "Material-Eleven PSD09 3.9.0 — joystick + cruceta TEST" --notes-file /tmp/release-notes.md --target main
-          fi
-
-      - name: Confirmar archivos publicados
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: gh release view v3.9.0-PSD09.1 --json url,assets
+          gh release create "$RELEASE_TAG" dist/*.vpk dist/SHA256SUMS.txt \
+            --title "Material-Eleven PSD09 3.9.0 — $RELEASE_TAG" \
+            --notes-file /tmp/release-notes.md \
+            --target main
