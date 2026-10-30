@@ -6,6 +6,10 @@ on:
     paths:
       - .github/workflows/publicar-material-eleven.yml
       - scripts/patch-*.py
+  pull_request:
+    paths:
+      - .github/workflows/publicar-material-eleven.yml
+      - scripts/patch-*.py
   workflow_dispatch:
     inputs:
       publish_release:
