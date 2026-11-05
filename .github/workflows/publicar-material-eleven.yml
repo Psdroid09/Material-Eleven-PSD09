@@ -41,33 +41,37 @@ jobs:
           path: dist/Material-Eleven-3.9.0-PSD09-joystick.vpk
           if-no-files-found: error
 
-      - name: Publicar únicamente el VPK de joystick
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: material-eleven-joystick
+          path: dist
+
+      - name: Actualizar release con un solo VPK
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          cat > /tmp/release-notes.md <<'EOF'
+          cat > release-notes.md <<'EOF'
           # Material-Eleven 3.9.0 — PSD09 Joystick
 
           Basado directamente en **Material-Eleven 3.9.0**, desarrollado por **Perroabuelo**.
 
-          Esta compilación conserva el reproductor original y añade únicamente el control para cambiar de canción con el **joystick derecho mientras la pantalla está apagada**:
+          Se conserva el reproductor original y se añade únicamente el control para cambiar de canción con el **joystick derecho mientras la pantalla está apagada**:
           - START: apaga la pantalla y mantiene la reproducción.
           - Joystick derecho a la izquierda: canción anterior.
           - Joystick derecho a la derecha: canción siguiente.
-          - Es necesario devolver el stick al centro entre cambios para evitar saltos repetidos.
+          - Devuelve el stick al centro entre cambios para registrar el siguiente movimiento.
 
-          Incluye un solo VPK. No incluye control por cruceta ni otras modificaciones de funciones.
+          Esta publicación contiene un solo VPK. No incluye control por cruceta ni otras modificaciones de funciones.
 
-          **Créditos y licencias:** Material-Eleven por Perroabuelo; basado en ElevenMPV de Joel16 e incluye componentes de ElevenMPV-A de GrapheneCt y colaboradores. Se conservan los avisos, créditos y licencias originales dentro del VPK. Código bajo GPL-3.0-or-later.
+          **Créditos:** Material-Eleven por Perroabuelo; ElevenMPV de Joel16; componentes de ElevenMPV-A de GrapheneCt y colaboradores. Se conservan los avisos y licencias originales del proyecto base.
           EOF
 
-          if gh release view v3.9.0-PSD09.1 >/dev/null 2>&1; then
-            gh release delete-asset v3.9.0-PSD09.1 Material-Eleven-3.9.0-PSD09-cruceta.vpk --yes || true
-            gh release upload v3.9.0-PSD09.1 dist/Material-Eleven-3.9.0-PSD09-joystick.vpk --clobber
-            gh release edit v3.9.0-PSD09.1 --title "Material-Eleven 3.9.0 — PSD09 Joystick" --notes-file /tmp/release-notes.md
-          else
-            gh release create v3.9.0-PSD09.1 dist/Material-Eleven-3.9.0-PSD09-joystick.vpk --title "Material-Eleven 3.9.0 — PSD09 Joystick" --notes-file /tmp/release-notes.md --target main
-          fi
-
+          gh release delete-asset v3.9.0-PSD09.1 Material-Eleven-3.9.0-PSD09-cruceta.vpk --yes || true
+          gh release upload v3.9.0-PSD09.1 dist/Material-Eleven-3.9.0-PSD09-joystick.vpk --clobber
+          gh release edit v3.9.0-PSD09.1 --title "Material-Eleven 3.9.0 — PSD09 Joystick" --notes-file release-notes.md
           gh release view v3.9.0-PSD09.1 --json url,assets
