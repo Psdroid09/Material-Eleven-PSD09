@@ -3,7 +3,7 @@
 
 ![Material-Eleven](https://raw.githubusercontent.com/Perroabuelo/Material-Eleven/v3.9.0/sce_sys/pic0.png)
 
-# Material-Eleven 3.9.0 — PSD09 Joystick
+# Material-Eleven 3.9.0 — PSD09mod
 
 Esta compilación parte directamente del proyecto original [Material-Eleven](https://github.com/Perroabuelo/Material-Eleven), desarrollado por **Perroabuelo**. Se conserva el reproductor original y se añade una sola función: cambiar de canción con el joystick derecho mientras la pantalla está apagada.
 
