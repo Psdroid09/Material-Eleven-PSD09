@@ -1,25 +1,32 @@
-# Material-Eleven PSD09 para PS Vita
+![Material-Eleven](https://raw.githubusercontent.com/Perroabuelo/Material-Eleven/v3.9.0/sce_sys/pic0.png)
 
-Modificación experimental de [Material-Eleven 3.9.0](https://github.com/Perroabuelo/Material-Eleven), basada en [ElevenMPV](https://github.com/joel16/ElevenMPV) y con la idea de control mediante stick durante pantalla apagada de [ElevenMPV-A](https://github.com/GrapheneCt/ElevenMPV-A).
+# Material-Eleven 3.9.0 — PSD09 Joystick
 
-## Descargar
+Esta compilación parte directamente del proyecto original [Material-Eleven](https://github.com/Perroabuelo/Material-Eleven), desarrollado por **Perroabuelo**. Se conserva el reproductor original y se añade una sola función: cambiar de canción con el joystick derecho mientras la pantalla está apagada.
 
-Consulta la sección [Releases](https://github.com/Psdroid09/Material-Eleven-PSD09/releases).
+## Descarga
 
-En la release **v3.9.0-PSD09.1** hay dos VPK:
-- **Material-Eleven-3.9.0-PSD09-joystick.vpk**: joystick derecho, hacia izquierda o derecha, cambia la pista mientras la pantalla está apagada tras usar START. **Probado en PS Vita por el usuario.**
-- **Material-Eleven-3.9.0-PSD09-cruceta.vpk**: cruceta izquierda/derecha, **experimental**; todavía falta probar si las entradas digitales llegan con la pantalla apagada.
+Consulta [Releases](https://github.com/Psdroid09/Material-Eleven-PSD09/releases). La publicación contiene un único archivo:
 
-Solo debes instalar uno a la vez. Ambos usan el ID `ELEVENMPV` y sustituyen la instalación anterior.
+- `Material-Eleven-3.9.0-PSD09-joystick.vpk`
 
-## Cómo se compila
+## Controles añadidos
 
-GitHub Actions descarga el código de Material-Eleven 3.9.0, aplica el parche seleccionado desde `scripts/` y compila usando VitaSDK. Los VPK se publican automáticamente en Releases. Se conservan las licencias originales incluidas en cada VPK.
+- **START:** apaga la pantalla y mantiene la reproducción.
+- **Joystick derecho a la izquierda:** reproduce la canción anterior.
+- **Joystick derecho a la derecha:** reproduce la canción siguiente.
+- Devuelve el stick al centro entre cambios para registrar el siguiente movimiento.
 
-## RepoHub y privacidad
+No se incluye una variante para la cruceta ni se añaden otras funciones al reproductor. Instala el VPK con VitaShell; comparte el identificador de aplicación `ELEVENMPV` con el original y sustituye la instalación existente.
 
-**El repositorio es privado.** RepoHub (robDevs) obtiene repositorios mediante el endpoint `/users/{owner}/repos` de GitHub, que no lista repositorios privados. Por ello, aunque exista una release, no se puede garantizar que aparezca al buscarla desde RepoHub. Para RepoHub la opción más compatible es hacer público el repositorio, **solo si su dueño decide cambiar la visibilidad**.
+## Proyecto original y créditos
+
+- **Material-Eleven:** Perroabuelo — https://github.com/Perroabuelo/Material-Eleven
+- **ElevenMPV:** Joel16 — https://github.com/joel16/ElevenMPV
+- **ElevenMPV-A:** GrapheneCt y colaboradores — https://github.com/GrapheneCt/ElevenMPV-A
+
+Este repositorio contiene únicamente el parche de joystick y el flujo de compilación para PS Vita. Se mantienen los avisos de copyright, NOTICE, LICENSE y licencias de terceros del proyecto base dentro del VPK.
 
 ## Licencia
 
-Código derivado de Material-Eleven bajo GNU GPL-3.0-or-later; se mantienen créditos, avisos y licencias del proyecto original dentro del VPK.
+El código derivado de Material-Eleven se distribuye bajo GNU GPL-3.0-or-later. Consulta las licencias originales incluidas en el proyecto y en el VPK.
